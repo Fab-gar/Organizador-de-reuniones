@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congregacion O.Libertad</title>
+    <!-- Enlazamos nuestra hoja de estilos CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <nav class="main-nav">
+            <button id="nav-public-btn" class="nav-btn active">Programa Público</button>
+            <button id="nav-gestor-btn" class="nav-btn hidden">Gestor de Grupos</button>
+            <button id="nav-programa-btn" class="nav-btn hidden">Armar Programa</button>
+            <button id="nav-custom-groups-btn" class="nav-btn hidden">Armar Grupos</button>
+            <button id="nav-tech-btn" class="nav-btn hidden">Audio/Video</button>
+            <button id="cleaning-config-btn" class="nav-btn hidden">⚙️ Ajuste Limpieza</button>
+            <div id="auth-status" class="auth-status">
+                <span id="user-greeting" class="hidden"></span>
+                <button id="login-btn">Iniciar Sesión para Editar</button>
+            </div>
+        </nav>
+
+        <!-- Vista Pública (NUEVA) -->
+        <div id="public-view">
+            <header class="programa-header">
+                <h1>Programa de la Reunión Vida y Ministerio Cristianos</h1>
+            </header>
+            <!-- Aviso de Limpieza (NUEVO) -->
+            <div id="cleaning-notice-container">
+                <!-- El aviso se generará aquí con JavaScript -->
+            </div>
+            <!-- Contenedor para botones de acciones públicas -->
+            <div id="public-actions-container" style="display: flex; justify-content: center; gap: 10px; padding: 10px 30px;"></div>
+             <!-- Contenedor para los programas técnicos en la vista pública (NUEVO) -->
+            <div id="public-tech-programs-container" class="programa-container hidden"></div>
+            <div id="public-program-container" class="programa-container">
+                <!-- El programa público se renderizará aquí con JavaScript -->
+            </div>
+        </div>
+        <!-- Vista del Gestor de Grupos -->
+        <div id="gestor-view" class="hidden">
+            <header class="input-panel">
+                <h1>Añadir Persona</h1>
+                <div class="form-group">
+                    <label for="nombre-input">Nombre:</label>
+                    <input type="text" id="nombre-input" placeholder="Escribe un nombre...">
+                </div>
+                <div class="form-group">
+                    <label for="grupo-select">Grupo:</label>
+                    <select id="grupo-select">
+                        <option value="ancianos">Ancianos</option>
+                        <option value="hermanas">Hermanas</option>
+                        <option value="ministeriales">Siervos Ministeriales</option>
+                        <option value="publicadores">Publicadores</option>
+                    </select>
+                </div>
+                <button id="anadir-btn">Añadir Persona</button>
+            </header>
+
+            <main class="lists-container">
+                <div class="list-wrapper">
+                    <h2>Ancianos</h2>
+                    <ul id="lista-ancianos" class="person-list">
+                        <!-- Los nombres se añadirán aquí con JavaScript -->
+                    </ul>
+                </div>
+
+                <div class="list-wrapper">
+                    <h2>Hermanas</h2>
+                    <ul id="lista-hermanas" class="person-list">
+                        <!-- Los nombres se cargarán desde la memoria (localStorage) -->
+                    </ul>
+                </div>
+
+                <div class="list-wrapper">
+                    <h2>Siervos Ministeriales</h2>
+                    <ul id="lista-ministeriales" class="person-list">
+                        <!-- Los nombres se añadirán aquí con JavaScript -->
+                    </ul>
+                </div>
+
+                <div class="list-wrapper">
+                    <h2>Publicadores</h2>
+                    <ul id="lista-publicadores" class="person-list">
+                        <!-- Los nombres se añadirán aquí con JavaScript -->
+                    </ul>
+                </div>
+            </main>
+        </div>
+
+        <!-- Vista para Armar Grupos Personalizados (NUEVA) -->
+        <div id="custom-groups-view" class="hidden">
+             <header class="programa-header">
+                <h1>Armar Grupos Personalizados</h1>
+            </header>
+            <div class="custom-groups-container">
+                <!-- Los grupos se renderizarán aquí -->
+            </div>
+            <div class="custom-groups-actions"><button id="add-custom-group-btn">Añadir Nuevo Grupo</button></div>
+        </div>
+
+        <!-- Vista para Audio/Video y Acomodadores (NUEVA) -->
+        <div id="tech-view" class="hidden">
+            <header class="programa-header">
+                <h1>Programas de Audio/Video y Acomodadores</h1>
+            </header>
+
+            <!-- New tab navigation -->
+            <div class="tech-sub-nav">
+                <button id="tech-programs-tab-btn" class="nav-btn active">Programas</button>
+                <button id="tech-team-tab-btn" class="nav-btn">Equipo Técnico</button>
+            </div>
+
+            <!-- Content for Programs tab -->
+            <div id="tech-programs-content">
+            <div class="tech-container">
+                <!-- Programa de Acomodadores -->
+                <div class="tech-program-wrapper">
+                    <h2>Programa de Acomodadores</h2>
+                    <table id="ushers-program-table" class="tech-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Auditorio</th>
+                                <th>Entrada</th>
+                                <th>Estacionamiento</th>
+                                <th>Cámaras</th>
+                                <th class="action-col"></th>
+                            </tr>
+                        </thead>
+                        <tbody><!-- Filas generadas por JS --></tbody>
+                    </table>
+                    <div class="tech-actions">
+                        <button id="auto-assign-ushers-btn">Asignar Acomodadores</button>
+                        <button id="add-usher-row-btn">Añadir Fila</button>
+                    </div>
+                </div>
+                <!-- Programa de Audio/Video -->
+                <div class="tech-program-wrapper">
+                    <h2>Programa de Audio/Video</h2>
+                    <table id="av-program-table" class="tech-table">
+                        <thead><tr><th>Fecha</th><th>Video</th><th>Audio</th><th>Micrófonos (2)</th><th>Plataforma</th><th class="action-col"></th></tr></thead>
+                        <tbody><!-- Filas generadas por JS --></tbody>
+                    </table>
+                    <div class="tech-actions">
+                        <button id="auto-assign-av-btn">Asignar Audio/Video</button>
+                        <button id="add-av-row-btn">Añadir Fila</button>
+                    </div>
+                </div>
+                <div class="programa-actions">
+                    <button id="share-tech-html-btn" class="btn-secondary">Compartir (Página Web)</button>
+                    <button id="export-tech-pdf-btn" class="btn-secondary">Exportar a PDF</button>
+                </div>
+            </div>
+            </div>
+
+            <!-- Content for Equipo Técnico tab (moved from original tech-team-view) -->
+            <div id="tech-team-content" class="hidden">
+                <header class="input-panel">
+                    <h1>Gestionar Equipo Técnico</h1>
+                    <div class="form-group">
+                        <label for="tech-team-name-input">Nombre:</label>
+                        <input type="text" id="tech-team-name-input" placeholder="Escribe un nombre...">
+                    </div>
+                    <div class="form-group">
+                        <label for="tech-team-group-select">Grupo:</label>
+                        <select id="tech-team-group-select">
+                            <option value="audio">Audio</option>
+                            <option value="video">Video</option>
+                            <option value="plataforma">Plataforma</option>
+                            <option value="microfonos">Micrófonos</option>
+                            <option value="auditorio">Acomodador: Auditorio</option>
+                            <option value="entrada">Acomodador: Entrada</option>
+                            <option value="estacionamiento">Acomodador: Estacionamiento</option>
+                            <option value="camaras">Acomodador: Cámaras</option>
+                        </select>
+                    </div>
+                    <button id="add-tech-team-member-btn">Añadir Miembro</button>
+                </header>
+                <main class="lists-container">
+                    <div class="list-wrapper"><h2>Audio</h2><ul id="lista-tech-audio" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Video</h2><ul id="lista-tech-video" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Plataforma</h2><ul id="lista-tech-plataforma" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Micrófonos</h2><ul id="lista-tech-microfonos" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Acomodador: Auditorio</h2><ul id="lista-tech-auditorio" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Acomodador: Entrada</h2><ul id="lista-tech-entrada" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Acomodador: Estacionamiento</h2><ul id="lista-tech-estacionamiento" class="person-list"></ul></div>
+                    <div class="list-wrapper"><h2>Acomodador: Cámaras</h2><ul id="lista-tech-camaras" class="person-list"></ul></div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Vista para Armar el Programa (inicialmente oculta) -->
+        <div id="programa-view" class="hidden">
+            <header class="programa-header">
+                <h1>Programa de la Reunión</h1>
+            </header>
+            <div class="programa-container">
+                <!-- Programa Semana 1 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="1" contenteditable="true">Semana 1</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="1"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-1">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE LA BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="1" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="1" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 2 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="2" contenteditable="true">Semana 2</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="2"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-2">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE LA BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="2" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="2" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 3 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="3" contenteditable="true">Semana 3</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="3"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-3">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE LA BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="3" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="3" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 4 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="4" contenteditable="true">Semana 4</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="4"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-4">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE LA BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="4" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="4" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 5 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="5" contenteditable="true">Semana 5</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="5"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-5">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE la BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="5" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="5" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 6 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="6" contenteditable="true">Semana 6</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="6"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-6">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE la BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="6" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="6" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 7 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="7" contenteditable="true">Semana 7</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="7"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-7">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE la BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="7" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="7" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <!-- Programa Semana 8 -->
+                <div class="program-week">
+                    <div class="week-header">
+                        <h2 class="editable-title" data-week-id="8" contenteditable="true">Semana 8</h2>
+                        <div class="assembly-toggle">
+                            <label class="switch"><input type="checkbox" class="assembly-checkbox" data-week-id="8"><span class="slider"></span></label>
+                            <label class="toggle-label">Asamblea</label>
+                        </div>
+                    </div>
+                    <table class="programa-table" id="programa-table-8">
+                        <thead>
+                            <tr>
+                                <th>Parte de la Reunión</th>
+                                <th>Asignado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Presidente</td><td class="asignable" data-part="presidente">[ Asignar ]</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="cancion_inicial" contenteditable="true">Canción</span></td><td><input type="number" class="song-number-input" data-part="cancion_inicial_num" placeholder="Nº"></td></tr>
+                            <tr><td>Oración inicial</td><td class="asignable" data-part="oracion_inicial">[ Asignar ]</td></tr>
+                            <tr class="section-header header-tesoros"><td colspan="2">TESOROS DE la BIBLIA</td></tr>
+                            <tr><td><span class="assignment-title" data-title-part="discurso_10min">Discurso 10min</span></td><td class="asignable" data-part="discurso">[ Asignar ]</td></tr>
+                            <tr><td>Perlas Escondidas</td><td class="asignable" data-part="perlas">[ Asignar ]</td></tr>
+                            <tr><td>Lectura de la Biblia</td><td class="asignable" data-part="lectura">[ Asignar ]</td></tr>
+                            <tr class="section-header header-maestros">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>SEAMOS MEJORES MAESTROS</span>
+                                    <button class="add-maestros-item-btn" data-table-target="8" title="Añadir asignación">+</button>
+                                </td>
+                            </tr>
+                            <tr class="section-header header-vida-cristiana">
+                                <td colspan="2" class="section-header-flex">
+                                    <span>NUESTRA VIDA CRISTIANA</span>
+                                    <button class="add-vida-cristiana-item-btn" data-table-target="8" title="Añadir parte">+</button>
+                                </td>
+                            </tr>
+                            <tr><td>Oración final</td><td class="asignable" data-part="oracion_final">[ Asignar ]</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="assembly-message">ESTA SEMANA HAY ASAMBLEA</div>
+                </div>
+
+                <div class="programa-actions">
+                    <button id="auto-assign-btn">Asignar Automáticamente</button>
+                    <button id="share-html-btn" class="btn-secondary">Compartir (Página Web)</button>
+                    <button id="export-pdf-btn" class="btn-secondary">Exportar a PDF</button>
+                    <button id="clear-program-btn" class="btn-secondary">Limpiar Programas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú contextual para mover personas (inicialmente oculto) -->
+    <div id="move-menu" class="context-menu hidden">
+        <!-- Las opciones de grupo se generarán aquí con JavaScript -->
+    </div>
+
+    <!-- Enlazamos nuestro archivo JavaScript al final del body -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

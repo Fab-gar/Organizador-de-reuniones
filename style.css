@@ -1,0 +1,765 @@
+/* Estilos generales y reseteo básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px;
+    min-height: 100vh;
+}
+
+/* Contenedor principal que simula una ventana de aplicación */
+.app-container {
+    width: 100%;
+    max-width: 1200px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Barra de navegación */
+.main-nav {
+    display: flex;
+    background-color: #3a7ecf;
+}
+
+.nav-btn {
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: 15px;
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-btn:hover {
+    background-color: #4a90e2;
+}
+
+.nav-btn.active {
+    background-color: #4a90e2;
+    border-bottom: 3px solid #ffffff;
+}
+
+.auth-status {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    flex-shrink: 0;
+}
+
+.auth-status #login-btn {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.auth-status #login-btn:hover {
+    background-color: #e67e22;
+}
+
+.auth-status #user-greeting {
+    color: white;
+    font-weight: 500;
+    margin-right: 15px;
+}
+
+/* Panel superior con los campos de entrada */
+.input-panel {
+    background-color: #4a90e2;
+    color: white;
+    padding: 20px 30px;
+    text-align: center;
+    border-top: 1px solid #3a7ecf;
+}
+
+.input-panel h1 {
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.form-group {
+    display: inline-block;
+    margin: 0 15px;
+}
+
+.input-panel label {
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+.input-panel input, .input-panel select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    min-width: 200px;
+}
+
+.input-panel button {
+    padding: 10px 20px;
+    background-color: #34c759;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.input-panel button:hover {
+    background-color: #2aa34a;
+}
+
+/* Contenedor de las listas */
+.lists-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 30px;
+    gap: 30px; /* Espacio entre las columnas */
+}
+
+.list-wrapper {
+    flex: 1 1 250px; /* Permite que crezcan, pero con una base de 250px */
+    min-width: 250px; /* Ancho mínimo para cada columna */
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.list-wrapper h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #4a90e2;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.person-list {
+    list-style-type: none; /* Quita los puntos de la lista */
+    height: 400px; /* Altura fija para que aparezca el scroll */
+    overflow-y: auto; /* Scroll vertical si el contenido se desborda */
+}
+
+.person-list li {
+    background-color: #ffffff;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.person-list li:hover {
+    background-color: #f5f5f5;
+}
+
+.person-name {
+    flex-grow: 1;
+}
+
+.family-tie {
+    font-size: 12px;
+    color: #999;
+    margin-left: 8px;
+    cursor: help;
+    border-bottom: 1px dotted #999;
+}
+
+.person-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 8px;
+    padding: 5px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
+    transition: background-color 0.2s;
+}
+
+.person-actions button:hover {
+    background-color: #e0e0e0;
+}
+
+.person-list li:last-child {
+    border-bottom: none;
+}
+
+/* --- Estilos para la Vista del Programa --- */
+.hidden {
+    display: none;
+}
+
+.programa-header {
+    padding: 20px 30px;
+    text-align: center;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.programa-header h1 {
+    color: #333;
+    font-weight: 500;
+}
+
+.programa-container {
+    padding: 30px;
+}
+
+.programa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.programa-table th, .programa-table td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.programa-table th {
+    background-color: #e9eff5;
+    font-weight: 600;
+}
+
+.programa-table .section-header td {
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.programa-table .header-tesoros td {
+    background-color: #808080; /* Gris */
+}
+
+.programa-table .header-maestros td {
+    background-color: #d4a017; /* Amarillo Mostaza */
+}
+
+.programa-table .header-vida-cristiana td {
+    background-color: #800000; /* Rojo Bordó */
+}
+
+.section-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-maestros-item-btn, .add-vida-cristiana-item-btn {
+    background-color: #34c759;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+    line-height: 28px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add-maestros-item-btn:hover, .add-vida-cristiana-item-btn:hover {
+    background-color: #2aa34a;
+}
+
+.programa-table .asignable {
+    cursor: pointer;
+    color: #007aff;
+    font-style: italic;
+    transition: background-color 0.2s;
+}
+
+.programa-table .asignable:hover {
+    background-color: #f0f8ff;
+}
+
+.program-week {
+    margin-bottom: 40px;
+}
+
+.week-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.assembly-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.assembly-toggle .toggle-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #f39c12;
+    cursor: pointer;
+}
+
+/* The switch - the box around the slider */
+.assembly-toggle .switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+/* Hide default HTML checkbox */
+.assembly-toggle .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.assembly-toggle .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.assembly-toggle .slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.assembly-toggle input:checked + .slider {
+  background-color: #c0392b;
+}
+
+.assembly-toggle input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.program-week .programa-table {
+    transition: opacity 0.3s;
+}
+
+.program-week h2.editable-title {
+    text-align: center;
+    font-size: 22px;
+    color: #3a7ecf;
+}
+
+.editable-title {
+    cursor: text;
+    outline: none;
+    border-bottom: 2px dashed transparent;
+}
+
+.assignment-title {
+    cursor: text;
+    outline: none;
+    border-bottom: 1px dotted transparent;
+}
+
+.song-number-input {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.assembly-message {
+    display: none;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #c0392b;
+    padding: 80px 20px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+}
+
+.assembly-week .programa-table {
+    display: none;
+}
+
+.assembly-week .assembly-message {
+    display: block;
+}
+
+.programa-actions {
+    text-align: center;
+    padding-top: 20px;
+}
+
+#auto-assign-btn {
+    background-color: #4a90e2;
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #f0f2f5;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.programa-actions button + button {
+    margin-left: 10px;
+}
+
+.programa-table .asignable:not(:last-child)::after {
+    content: " / ";
+    color: #ccc;
+    font-style: normal;
+    cursor: default;
+}
+
+.delete-assignment-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+
+.programa-table tr:hover .delete-assignment-btn {
+    opacity: 1;
+}
+
+/* --- Estilos para el Menú Contextual de Mover --- */
+.context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    border-radius: 5px;
+    z-index: 1001;
+    padding: 5px 0;
+}
+
+.context-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 20px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.context-menu button:hover {
+    background-color: #f0f2f5;
+}
+
+/* --- Estilos para el Modo de Solo Lectura --- */
+.readonly .input-panel,
+.readonly .person-actions,
+.readonly .add-maestros-item-btn,
+.readonly .add-vida-cristiana-item-btn,
+.readonly .delete-assignment-btn,
+.readonly .programa-actions,
+.readonly .move-btn {
+    display: none !important;
+}
+
+.readonly .asignable,
+.readonly .editable-title,
+.readonly .assignment-title {
+    cursor: default;
+    color: #333;
+    font-style: normal;
+}
+
+.readonly .asignable:hover {
+    background-color: transparent;
+}
+
+.readonly input[type="text"],
+.readonly input[type="number"],
+.readonly select {
+    pointer-events: none;
+    background-color: #f0f2f5;
+}
+
+/* --- Estilos para el Aviso de Limpieza --- */
+#cleaning-notice-container {
+    padding: 15px 30px;
+    background-color: #fffbe6; /* Un amarillo claro para destacar */
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cleaning-notice {
+    background-color: #f39c12; /* Naranja */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cleaning-notice:hover {
+    background-color: #e67e22;
+}
+
+.cleaning-notice:active {
+    transform: scale(0.98);
+}
+
+.swal2-html-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 15px;
+    text-align: left;
+}
+
+/* --- Estilos para la Navegación de Pestañas dentro de Tech View --- */
+.tech-sub-nav {
+    display: flex;
+    background-color: #e9eff5;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.tech-sub-nav .nav-btn {
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: 10px 15px;
+    background-color: transparent;
+    border: none;
+    color: #3a7ecf;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.tech-sub-nav .nav-btn.active {
+    background-color: #ffffff;
+    border-bottom: 2px solid #3a7ecf;
+}
+
+/* Estilos para los botones de selección de grupo en SweetAlert */
+.swal-cleaning-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 10px;
+}
+
+.swal-cleaning-group-btn {
+    padding: 10px 20px;
+    border: 2px solid #3a7ecf;
+    background-color: #f0f2f5;
+    color: #3a7ecf;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.swal-cleaning-group-btn.selected {
+    background-color: #3a7ecf;
+    color: white;
+}
+
+/* --- Estilos para la Gestión de Grupos Personalizados --- */
+.custom-groups-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 30px;
+    justify-content: center;
+}
+
+.custom-group-card {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.custom-group-card input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #3a7ecf;
+}
+
+.custom-group-card textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+.custom-group-card .delete-custom-group-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-end;
+}
+
+.custom-groups-actions {
+    text-align: center;
+    padding: 0 30px 30px 30px;
+}
+
+#add-custom-group-btn {
+    background-color: #34c759;
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.tech-table td[contenteditable="true"] {
+    cursor: pointer;
+}
+
+.tech-table td[contenteditable="true"]:hover {
+    background-color: #f0f8ff;
+}
+
+
+/* --- Estilos para la Vista de Audio/Video --- */
+.tech-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 30px;
+}
+
+.tech-program-wrapper {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.tech-program-wrapper h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #3a7ecf;
+}
+
+.tech-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tech-table th, .tech-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.tech-table th {
+    background-color: #e9eff5;
+}
+
+.tech-table td {
+    background-color: #fff;
+    min-width: 100px;
+}
+
+.tech-table td[contenteditable="true"]:focus {
+    outline: 2px solid #4a90e2;
+    background-color: #f0f8ff;
+}
+
+.tech-table .action-col {
+    width: 50px;
+}
+
+.delete-tech-row-btn {
+    background-color: transparent;
+    color: #e74c3c;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.tech-actions {
+    text-align: right;
+    margin-top: 15px;
+}
+
+.tech-actions button {
+    background-color: #34c759;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
