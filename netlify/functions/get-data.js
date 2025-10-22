@@ -2,7 +2,7 @@ const { neon } = require('@neondatabase/serverless');
 
 exports.handler = async () => {
   try {
-    const sql = neon(process.env.DATABASE_URL);
+    const sql = neon(process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL);
     
     const result = await sql`SELECT jsonData FROM program_data WHERE id = 1;`;
 
