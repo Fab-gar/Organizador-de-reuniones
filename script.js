@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Guarda el estado actual de las listas y el programa en localStorage.
      */
-    function guardarDatos() {
+    async function guardarDatos(datos) {
         const datosParaGuardar = {
             listas: {},
             customGroups: customGroups,
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             techTeam: {},
             techAVProgram: [],
             familyTies: familyTies,
-            participationDates: {}, // Añadido para el historial
+            participationDates: datos?.participationDates || {}, // Usar historial existente o uno nuevo
             weekTitles: [],
             assemblyWeeks: [],
             discursoTitles: [],
@@ -262,12 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     datosParaGuardar.techTeam[grupoId].push(span.textContent);
                 });
             }
-        }
-
-        // Cargar historial existente para no sobrescribirlo
-        const datosViejos = JSON.parse(localStorage.getItem('gestorProgramaData') || '{}');
-        if (datosViejos.participationDates) {
-            datosParaGuardar.participationDates = datosViejos.participationDates;
         }
 
         // Recopilar títulos de las semanas
@@ -367,18 +361,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        localStorage.setItem('gestorProgramaData', JSON.stringify(datosParaGuardar));
+        // En lugar de localStorage, enviamos los datos a nuestra función serverless
+        try {
+            const response = await fetch('/.netlify/functions/save-data', {
+                method: 'POST',
+                body: JSON.stringify(datosParaGuardar)
+            });
+            if (!response.ok) {
+                console.error('Error al guardar los datos en el servidor.');
+            }
+        } catch (error) {
+            console.error('Error de red al intentar guardar los datos:', error);
+        }
+
         renderPublicView(); // Actualizar la vista pública cada vez que se guarda
     }
 
     /**
      * Carga los datos desde localStorage y repuebla la interfaz.
      */
-    function cargarDatos() {
-        const datosGuardados = localStorage.getItem('gestorProgramaData');
-        if (!datosGuardados) return;
-
-        const datos = JSON.parse(datosGuardados);
+    async function cargarDatos() {
+        // Reemplazamos localStorage.getItem con una llamada a nuestra función serverless
+        const response = await fetch('/.netlify/functions/get-data');
+        const datos = await response.json();
+        if (!datos || Object.keys(datos).length === 0) return null; // Devolver null si no hay datos
 
         // Cargar lazos familiares
         familyTies = datos.familyTies || [];
@@ -514,26 +520,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-    }
 
-    /**
-     * Convierte el formato antiguo de participationDates (string) al nuevo (array de objetos).
-     * Se ejecuta una sola vez si detecta el formato antiguo.
-     */
-    function migrarHistorialParticipacion() {
-        const datos = JSON.parse(localStorage.getItem('gestorProgramaData') || '{}');
-        if (datos.participationDates) {
-            const necesitaMigracion = Object.values(datos.participationDates).some(val => typeof val === 'string');
-            if (necesitaMigracion) {
-                console.log("Migrando historial de participación al nuevo formato...");
-                Object.keys(datos.participationDates).forEach(nombre => {
-                    if (typeof datos.participationDates[nombre] === 'string') {
-                        datos.participationDates[nombre] = [{ date: datos.participationDates[nombre], part: 'desconocido' }];
-                    }
-                });
-                localStorage.setItem('gestorProgramaData', JSON.stringify(datos));
-            }
-        }
+        return datos; // Devolver los datos cargados
     }
 
     /**
@@ -571,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
         targetTable.insertBefore(newRow, vidaCristianaHeader);
 
         // Añadir evento para guardar al editar el título
-        newRow.querySelector('.assignment-title').addEventListener('blur', guardarDatos);
+        newRow.querySelector('.assignment-title').addEventListener('blur', async () => { const d = await cargarDatos(); guardarDatos(d); });
 
         // Añadir evento para eliminar la fila
         newRow.querySelector('.delete-assignment-btn').addEventListener('click', async () => {
@@ -585,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (result.isConfirmed) {
                 newRow.remove();
-                guardarDatos();
+                const d = await cargarDatos(); guardarDatos(d);
             }
         });
 
@@ -642,13 +630,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Añadir evento para guardar al editar el título
-        newRow.querySelector('.assignment-title').addEventListener('blur', guardarDatos);
+        newRow.querySelector('.assignment-title').addEventListener('blur', async () => { const d = await cargarDatos(); guardarDatos(d); });
 
         // Añadir evento para guardar al cambiar el número de canción
         if (esCancion) {
             const songInput = newRow.querySelector('.song-number-input');
             if (songInput) {
-                songInput.addEventListener('change', guardarDatos);
+                songInput.addEventListener('change', async () => { const d = await cargarDatos(); guardarDatos(d); });
             }
         }
 
@@ -666,7 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (result.isConfirmed) {
                     newRow.remove();
-                    guardarDatos();
+                    const d = await cargarDatos(); guardarDatos(d);
                 }
             });
         }
@@ -721,8 +709,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (newName && newName.trim() !== nombre) {
                             const oldName = nombre;
                             techTeam[grupoId] = techTeam[grupoId].map(n => n === oldName ? newName.trim() : n);
-                            renderTechTeamLists();
-                            guardarDatos();
+                            renderTechTeamLists(); // Renderiza la lista actualizada
+                            const d = await cargarDatos(); guardarDatos(d); // Guarda el estado completo
                         }
                     });
                     elementoPersona.querySelector('.delete-btn').addEventListener('click', async () => {
@@ -732,8 +720,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                         if (result.isConfirmed) {
                             techTeam[grupoId] = techTeam[grupoId].filter(n => n !== nombre);
-                            renderTechTeamLists();
-                            guardarDatos();
+                            renderTechTeamLists(); // Renderiza la lista actualizada
+                            const d = await cargarDatos(); guardarDatos(d); // Guarda el estado completo
                         }
                     });
                     listaUI.appendChild(elementoPersona);
@@ -759,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
             techTeam[group].push(name);
             techTeam[group].sort((a, b) => a.localeCompare(b)); // Mantener ordenado
             renderTechTeamLists();
-            guardarDatos();
+            cargarDatos().then(d => guardarDatos(d));
             nameInput.value = '';
             nameInput.focus();
         } else if (techTeam[group] && techTeam[group].includes(name)) {
@@ -897,8 +885,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showCustomGroupsBtn.textContent = 'Ver Grupos Personalizados';
         showCustomGroupsBtn.className = 'btn-secondary';
         showCustomGroupsBtn.addEventListener('click', () => {
-            const datos = JSON.parse(localStorage.getItem('gestorProgramaData') || '{}');
-            const grupos = datos.customGroups || {};
+            // Usamos la variable en memoria en lugar de leer de localStorage
+            const grupos = customGroups || {};
 
             let modalHtml = '<div style="display: flex; flex-wrap: wrap; justify-content: space-around; text-align: left;">';
 
@@ -1138,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cleaningEpoch = new Date(year, month - 1, day);
 
             // Guardar los datos en localStorage
-            guardarDatos(); // La función guardarDatos ya se encarga de todo
+            cargarDatos().then(d => guardarDatos(d)); // La función guardarDatos ya se encarga de todo
 
             // Volver a renderizar el aviso de limpieza
             renderCleaningNotice();
@@ -1169,14 +1157,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Evento para guardar al cambiar el nombre del grupo
             card.querySelector('.custom-group-name').addEventListener('change', (e) => {
                 customGroups[groupId].name = e.target.value;
-                guardarDatos();
+                cargarDatos().then(d => guardarDatos(d));
             });
 
             // Evento para guardar al cambiar el textarea de miembros
             card.querySelector('textarea').addEventListener('change', (e) => {
                 const updatedMembers = e.target.value.split('\n').map(name => name.trim()).filter(name => name);
                 customGroups[groupId].members = updatedMembers;
-                guardarDatos();
+                cargarDatos().then(d => guardarDatos(d));
             });
 
             // Evento para el botón de eliminar
@@ -1193,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (result.isConfirmed) {
                     delete customGroups[groupIdToDelete];
-                    guardarDatos();
+                    cargarDatos().then(d => guardarDatos(d));
                     renderCustomGroupsManagement(); // Volver a renderizar la vista
                 }
             });
@@ -1209,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Nuevo Grupo',
             members: []
         };
-        guardarDatos();
+        cargarDatos().then(d => guardarDatos(d));
         renderCustomGroupsManagement();
         Swal.fire({
             title: '¡Grupo añadido!',
@@ -1275,15 +1263,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cell.classList.contains('asignable')) {
                 cell.setAttribute('contenteditable', 'true');
             }
-            cell.addEventListener('blur', guardarDatos);
+            cell.addEventListener('blur', async () => { const d = await cargarDatos(); guardarDatos(d); });
         });
 
         // Evento para eliminar la fila
         tr.querySelector('.delete-tech-row-btn').addEventListener('click', () => {
             if (type === 'ushers') techUshersProgram.splice(index, 1);
             else techAVProgram.splice(index, 1);
-            renderTechTables();
-            guardarDatos();
+            renderTechTables(); // Actualiza la UI
+            cargarDatos().then(d => guardarDatos(d)); // Guarda el estado completo
         });
 
         return tr;
@@ -1353,7 +1341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderTechTables();
-        guardarDatos();
+        cargarDatos().then(d => guardarDatos(d));
         Swal.fire('¡Listo!', 'Programa de Acomodadores asignado.', 'success');
     }
 
@@ -1417,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderTechTables();
-        guardarDatos();
+        cargarDatos().then(d => guardarDatos(d));
         Swal.fire('¡Listo!', 'Programa de Audio/Video asignado.', 'success');
     }
 
@@ -1554,7 +1542,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Cargar historial de participación
-        const participationDates = JSON.parse(localStorage.getItem('gestorProgramaData') || '{}').participationDates || {};
+        const datosGuardados = await cargarDatos();
+        const participationDates = datosGuardados.participationDates || {};
         const hoy = new Date();
 
         const getPersonasPorGrupo = (grupoId) => Array.from(listas[grupoId].querySelectorAll('.person-name')).map(span => span.textContent);
@@ -1945,12 +1934,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Guardar el historial actualizado
-        const datosActuales = JSON.parse(localStorage.getItem('gestorProgramaData') || '{}');
-        datosActuales.participationDates = nuevasFechasParticipacion;
-        localStorage.setItem('gestorProgramaData', JSON.stringify(datosActuales));
+        const datosParaGuardar = { ...datosGuardados, participationDates: nuevasFechasParticipacion };
+        await guardarDatos(datosParaGuardar);
 
         Swal.fire('¡Listo!', 'Programa asignado automáticamente.', 'success');
-        guardarDatos();
     }
 
     async function limpiarPrograma(confirmar = true) {
@@ -1989,7 +1976,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 3. Guardar el estado limpio
-        guardarDatos();
+        cargarDatos().then(d => guardarDatos(d));
 
         if (confirmar) {
             Swal.fire('¡Listo!', 'El programa ha sido limpiado.', 'success');
@@ -2276,7 +2263,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (result.isConfirmed) {
                 li.remove();
-                guardarDatos();
+                cargarDatos().then(d => guardarDatos(d));
             }
         }
 
@@ -2304,13 +2291,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 2. Actualizar nombre en todas las estructuras de datos
                     familyTies = familyTies.map(tie => tie.map(p => (p === oldName ? trimmedNewName : p)));
 
-                    const datosGuardados = JSON.parse(localStorage.getItem('gestorProgramaData') || '{}');
-                    if (datosGuardados.participationDates && datosGuardados.participationDates[oldName]) {
-                        datosGuardados.participationDates[trimmedNewName] = datosGuardados.participationDates[oldName];
-                        delete datosGuardados.participationDates[oldName];
-                    }
-                    localStorage.setItem('gestorProgramaData', JSON.stringify(datosGuardados));
-
                     // Actualizar nombre en el programa si estaba asignado
                     programaTables.forEach(table => {
                         table.querySelectorAll('.asignable').forEach(celda => {
@@ -2319,6 +2299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         });
                     });
+                    cargarDatos().then(d => guardarDatos(d)); // Guardar todos los cambios
                 }
             }
 
@@ -2372,8 +2353,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const button = document.createElement('button');
                 button.textContent = `Mover a ${grupo.charAt(0).toUpperCase() + grupo.slice(1)}`;
                 button.onclick = () => {
-                    listas[grupo].appendChild(li);
-                    guardarDatos();
+                    listas[grupo].appendChild(li); // Mueve el elemento en la UI
+                    cargarDatos().then(d => guardarDatos(d)); // Guarda el estado completo
                     moveMenu.classList.add('hidden');
                 };
                 moveMenu.appendChild(button);
@@ -2412,7 +2393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Swal.fire('¡Vinculados!', `"${p1}" y "${p2}" ahora están vinculados como familia.`, 'success');
         }
 
-        guardarDatos();
+        cargarDatos().then(d => guardarDatos(d));
         actualizarVistaFamiliares();
     }
 
@@ -2549,7 +2530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     cell.textContent = selection;
                 }
-                guardarDatos();
+                cargarDatos().then(d => guardarDatos(d));
             }
         }
     });
@@ -2628,7 +2609,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     target.textContent = seleccion;
                     target.style.fontStyle = 'normal';
                 }
-                guardarDatos();
+                cargarDatos().then(d => guardarDatos(d));
             }
         }
     });
@@ -2636,22 +2617,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Evento para guardar los títulos de las semanas al editarlos
     document.querySelectorAll('.editable-title').forEach(title => {
         title.addEventListener('blur', () => {
-            guardarDatos();
+            cargarDatos().then(d => guardarDatos(d));
         });
     });
 
     // Evento para guardar los títulos de los discursos al editarlos
     document.querySelectorAll('[data-title-part="discurso_10min"]').forEach(title => {
         title.setAttribute('contenteditable', 'true');
-        title.addEventListener('blur', guardarDatos);
+        title.addEventListener('blur', async () => { const d = await cargarDatos(); guardarDatos(d); });
     });
 
     // Evento para guardar la canción inicial
     document.querySelectorAll('input[data-part="cancion_inicial_num"]').forEach(input => {
-        input.addEventListener('change', guardarDatos);
+        input.addEventListener('change', async () => { const d = await cargarDatos(); guardarDatos(d); });
     });
     document.querySelectorAll('span[data-title-part="cancion_inicial"]').forEach(span => {
-        span.addEventListener('blur', guardarDatos);
+        span.addEventListener('blur', async () => { const d = await cargarDatos(); guardarDatos(d); });
     });
 
     // Evento para los checkboxes de Asamblea
@@ -2660,7 +2641,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const weekId = checkbox.dataset.weekId;
             const weekDiv = document.querySelector(`.program-week:has([data-week-id="${weekId}"])`);
             weekDiv.classList.toggle('assembly-week');
-            guardarDatos();
+            cargarDatos().then(d => guardarDatos(d));
         });
     });
 
@@ -2723,11 +2704,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 5. INICIALIZACIÓN ---
     // Migrar datos antiguos si es necesario, antes de cargar todo
-    window.jsPDF = window.jspdf.jsPDF; // Necesario para que autoTable funcione
-    migrarHistorialParticipacion();
-
     // Cargar los datos guardados al iniciar la aplicación
-    cargarDatos(); 
+    cargarDatos().then(() => {
 
     // Renderizar la vista pública al cargar
     renderPublicView();
@@ -2756,5 +2734,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Si no hay datos guardados, crear las filas por defecto para cada tabla
     programaTables.forEach((table, index) => {
         inicializarFilasPorDefecto(table, index);
+    });
     });
 });
