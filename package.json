@@ -1,0 +1,8 @@
+{
+  "name": "regissreuu",
+  "version": "1.0.0",
+  "description": "Netlify project with Neon database integration",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.1"
+  }
+}
